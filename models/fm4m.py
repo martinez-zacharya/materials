@@ -243,31 +243,31 @@ def get_representation(train_data, test_data, model_type, return_tensor=True):
             train_emb = model.encode(train_data)
             x_batch = torch.stack(train_emb)
 
-            test_emb = model.encode(test_data)
-            x_batch_test = torch.stack(test_emb)
+            # test_emb = model.encode(test_data)
+            # x_batch_test = torch.stack(test_emb)
         if not return_tensor:
             x_batch = pd.DataFrame(x_batch)
-            x_batch_test = pd.DataFrame(x_batch_test)
+            # x_batch_test = pd.DataFrame(x_batch_test)
 
 
     elif model_type == "bart":
         model = bart()
         model.load()
         x_batch = model.encode(train_data, return_tensor=return_tensor)
-        x_batch_test = model.encode(test_data, return_tensor=return_tensor)
+        # x_batch_test = model.encode(test_data, return_tensor=return_tensor)
 
 
     elif model_type == "pos":
         model = pos()
         model.load()
         x_batch = model.encode(train_data, return_tensor=return_tensor)
-        x_batch_test = model.encode(test_data, return_tensor=return_tensor)
+        # x_batch_test = model.encode(test_data, return_tensor=return_tensor)
 
     elif model_type == "smi-ted":
         model = load_smi_ted(folder='../models/smi_ted/smi_ted_light', ckpt_filename='smi-ted-Light_40.pt')
         with torch.no_grad():
             x_batch = model.encode(train_data, return_torch=return_tensor)
-            x_batch_test = model.encode(test_data, return_torch=return_tensor)
+            # x_batch_test = model.encode(test_data, return_torch=return_tensor)
 
     elif model_type == "mol-xl":
         model = AutoModel.from_pretrained("ibm/MoLFormer-XL-both-10pct", deterministic_eval=True,
@@ -284,22 +284,23 @@ def get_representation(train_data, test_data, model_type, return_tensor=True):
 
         x_batch = outputs.pooler_output
 
-        if type(test_data) == list:
-            inputs = tokenizer(test_data, padding=True, return_tensors="pt")
-        else:
-            inputs = tokenizer(list(test_data.values), padding=True, return_tensors="pt")
+        # if type(test_data) == list:
+        #     inputs = tokenizer(test_data, padding=True, return_tensors="pt")
+        # else:
+        #     inputs = tokenizer(list(test_data.values), padding=True, return_tensors="pt")
 
-        with torch.no_grad():
-            outputs = model(**inputs)
+        # with torch.no_grad():
+        #     outputs = model(**inputs)
 
-        x_batch_test = outputs.pooler_output
+        # x_batch_test = outputs.pooler_output
 
         if not return_tensor:
             x_batch = pd.DataFrame(x_batch)
-            x_batch_test = pd.DataFrame(x_batch_test)
+            # x_batch_test = pd.DataFrame(x_batch_test)
 
     elif model_type == 'Mordred':
-        all_data = train_data + test_data
+        # all_data = train_data + test_data
+        all_data = train_data
         calc = Calculator(descriptors, ignore_3D=True)
         mol_list = [Chem.MolFromSmiles(sm) for sm in all_data]
         x_all = calc.pandas(mol_list)
@@ -322,7 +323,7 @@ def get_representation(train_data, test_data, model_type, return_tensor=True):
         params = {'radius': 2, 'nBits': 1024}
 
         mol_train = [Chem.MolFromSmiles(sm) for sm in train_data]
-        mol_test = [Chem.MolFromSmiles(sm) for sm in test_data]
+        # mol_test = [Chem.MolFromSmiles(sm) for sm in test_data]
 
         x_batch = []
         for mol in mol_train:
@@ -332,15 +333,15 @@ def get_representation(train_data, test_data, model_type, return_tensor=True):
             x_batch.append(vector)
         x_batch = pd.DataFrame(x_batch)
 
-        x_batch_test = []
-        for mol in mol_test:
-            info = {}
-            fp = AllChem.GetMorganFingerprintAsBitVect(mol, **params, bitInfo=info)
-            vector = list(fp)
-            x_batch_test.append(vector)
-        x_batch_test = pd.DataFrame(x_batch_test)
+        # x_batch_test = []
+        # for mol in mol_test:
+        #     info = {}
+        #     fp = AllChem.GetMorganFingerprintAsBitVect(mol, **params, bitInfo=info)
+        #     vector = list(fp)
+        #     x_batch_test.append(vector)
+        # x_batch_test = pd.DataFrame(x_batch_test)
 
-    return x_batch, x_batch_test
+    return x_batch, x_batch
 
 
 def single_modal(model, task_name="custom", dataset=None, downstream_model=None, params=None, x_train=None, x_test=None,
